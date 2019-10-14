@@ -9,14 +9,13 @@ import (
 	"golangapi/routers"
 	"strings"
 
-	//"github.com/labstack/echo"
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
 
 	"golangapi/middlewares"
 )
 
-func main() {
+func _main() {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")

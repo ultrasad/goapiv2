@@ -1,12 +1,11 @@
-package routers
+package main
 
 import (
+	"golangapi/controllers"
+	"golangapi/middlewares"
 	"net/http"
 	"os"
 	"time"
-
-	"golangapi/controllers"
-	"golangapi/middlewares"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
@@ -14,8 +13,47 @@ import (
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	//"net/http/httptrace"
 )
+
+//APIHandler is main api handler
+type handler struct{}
+
+//CustomerHandler is struct
+type CustomerHandler struct{}
+
+//Initialize is cus init
+func (h *CustomerHandler) Initialize() {
+
+}
+
+// Most of the code is taken from the echo guide
+// https://echo.labstack.com/cookbook/jwt
+func (h *handler) login(c echo.Context) error {
+	username := c.FormValue("username")
+	password := c.FormValue("password")
+	// Check in your db if the user exists or not
+	if username == "jon" && password == "password" {
+		// Create token
+		token := jwt.New(jwt.SigningMethodHS256)
+		// Set claims
+		// This is the information which frontend can use
+		// The backend can also decode the token and get admin etc.
+		claims := token.Claims.(jwt.MapClaims)
+		claims["name"] = "Jon Doe"
+		claims["admin"] = true
+		claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+		// Generate encoded token and send it as response.
+		// The signing string should be secret (a generated UUID works too)
+		t, err := token.SignedString([]byte("secret"))
+		if err != nil {
+			return err
+		}
+		return c.JSON(http.StatusOK, map[string]string{
+			"token": t,
+		})
+	}
+	return echo.ErrUnauthorized
+}
 
 // TimeEncoder return time encode
 func TimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
@@ -23,11 +61,8 @@ func TimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.UTC().Format("2006-01-02T15:04:05Z"))
 }
 
-//Init func
-func Init(e *echo.Echo) {
-
-	//hook := zapcore.AddSync(&middlewares.Logrus{Collection: "logger"})
-
+//Initialize is init
+func (h *handler) Initialize(e *echo.Echo) {
 	encoderConfig := zapcore.EncoderConfig{
 		TimeKey:   "time",
 		LevelKey:  "level",
@@ -60,14 +95,12 @@ func Init(e *echo.Echo) {
 
 	e.Use(middlewares.ZapLogger(zaplogger))
 
-	/*
-		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-			if username == "hanajung" && password == "secret" {
-				return true, nil
-			}
-			return false, nil
-		}))
-	*/
+	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if username == "hanajung" && password == "secret" {
+			return true, nil
+		}
+		return false, nil
+	}))
 
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: `{"level":"info", "time":"${time_rfc3339}","id":"${id}","remote_ip":"${remote_ip}","host":"${host}",` +
@@ -97,18 +130,6 @@ func Init(e *echo.Echo) {
 		return c.String(http.StatusOK, "OK")
 	})
 
-	// Login route
-	e.POST("/login", login)
-
-	// Unauthenticated route
-	e.GET("/", accessible)
-
-	// Restricted group
-	r := e.Group("/api")
-	r.Use(middleware.JWT([]byte("secret")))
-	r.GET("/restricted", restricted)
-	r.GET("/todos", controllers.List)
-
 	e.GET("/todos", controllers.List)
 	e.POST("/todos", controllers.Create)
 	e.GET("/todos/:id", controllers.View)
@@ -125,62 +146,4 @@ func Init(e *echo.Echo) {
 
 	//Elastics Search
 	e.GET("/essearch", controllers.Search)
-
-	//e.Logger.Fatal(e.Start(port))
-
-	//e.Get("/log", ...)
-	//g := e.Group("/group", authenticationMiddleware)
-	//g.Get("/auth", ...)
-}
-
-func accessible(c echo.Context) error {
-	return c.String(http.StatusOK, "Accessible")
-}
-
-func restricted(c echo.Context) error {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	name := claims["name"].(string)
-
-	//return c.String(http.StatusOK, "Welcome "+name+"!")
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Welcome " + name,
-	})
-}
-
-func login(c echo.Context) error {
-	username := c.FormValue("username")
-	//email := c.FormValue("email")
-	password := c.FormValue("password")
-
-	// in our case, the only "valid user and password" is
-	// user: rickety_cricket@example.com pw: shhh!
-	// really, this would be connected to any database and
-	// retrieving the user and validating the password
-	//if email != "rickety_cricket@example.com" || password != "shhh!" {
-	if username != "hanajung" || password != "shhh!" {
-		return echo.ErrUnauthorized
-	}
-
-	// create token
-	token := jwt.New(jwt.SigningMethodHS256)
-
-	// set claims
-	claims := token.Claims.(jwt.MapClaims)
-	// add any key value fields to the token
-	//claims["email"] = "rickety_cricket@example.com"
-	claims["name"] = "Hanajung"
-	claims["admin"] = true
-	claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
-
-	// generate encoded token and send it as response.
-	t, err := token.SignedString([]byte("secret"))
-	if err != nil {
-		return err
-	}
-
-	// return the token for the consumer to grab and save
-	return c.JSON(http.StatusOK, map[string]string{
-		"token": t,
-	})
 }

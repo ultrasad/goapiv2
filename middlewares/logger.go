@@ -68,6 +68,15 @@ type (
 		// Res        interface{} `json:"res" bson:"response"`
 		// Message    string      `bson:"-" json:"message"`
 		// Collection string      `bson:"-"`
+
+		ID       string `json:"id" bson:"id"`
+		RemoteIP string `bson:"remote_ip" json:"remote_ip"`
+		Host     string `bson:"host" json:"host"`
+		Method   string `bson:"method" json:"method"`
+		URI      string `bson:"uri" json:"uri"`
+		Status   int    `bson:"status" json:"status"`
+		Latency  string `bson:"latency" json:"latency"`
+
 		Time       time.Time `bson:"time" json:"time"`
 		Lv         string    `bson:"level" json:"level"`
 		Prefix     string    `bson:"prefix" json:"prefix"`

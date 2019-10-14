@@ -97,12 +97,13 @@ func ZapLogger(log *zap.Logger) echo.MiddlewareFunc {
 
 				// fmt.Println("m => ", m)
 
-				fmt.Println("resBody => ", resBody)
+				//fmt.Println("resBody => ", resBody)
 
 				jsonStr := fmt.Sprintf(`{"id":"%s","req":%s,"res":%s}`, c.Response().Header().Get(echo.HeaderXRequestID), reqB, resBody)
-				fmt.Println("jsonStr brfore => ", jsonStr)
+				//fmt.Println("jsonStr brfore => ", jsonStr)
 
-				jsonData := echo.Map{}
+				//jsonData := echo.Map{}
+				var jsonData map[string]interface{}
 				if err := json.Unmarshal([]byte(jsonStr), &jsonData); err != nil {
 					panic(err)
 				}
@@ -113,7 +114,7 @@ func ZapLogger(log *zap.Logger) echo.MiddlewareFunc {
 				// 	return
 				// }
 
-				fmt.Println("jsonStr after => ", jsonData)
+				//fmt.Println("jsonStr after => ", jsonData)
 
 				fields := []zapcore.Field{
 					zap.Int("status", res.Status),
