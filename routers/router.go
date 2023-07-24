@@ -134,7 +134,7 @@ func Init(e *echo.Echo) {
 }
 
 func accessible(c echo.Context) error {
-	return c.String(http.StatusOK, "Accessible")
+	return c.String(http.StatusOK, "{status: Accessible}")
 }
 
 func restricted(c echo.Context) error {

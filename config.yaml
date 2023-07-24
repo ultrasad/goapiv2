@@ -1,8 +1,8 @@
 port: 8083
 mongo:
-  user: root
-  pass: example
-  host: localhost:27017
+  user: hanajung
+  pass: test1234
+  host: golang_api_db:27017
   db: document
 mysql:
   user: interfacedev

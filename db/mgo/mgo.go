@@ -18,8 +18,9 @@ func ConnectMgo() *mgo.Session {
 	mongoHost := viper.GetString("mongo.host")
 	mongoUser := viper.GetString("mongo.user")
 	mongoPass := viper.GetString("mongo.pass")
+	mongoDatabase := viper.GetString("mongo.db")
 
-	connString := fmt.Sprintf("%v:%v@%v", mongoUser, mongoPass, mongoHost)
+	connString := fmt.Sprintf("%v:%v@%v/%v", mongoUser, mongoPass, mongoHost, mongoDatabase)
 	mongoDB, err = mgo.Dial(connString)
 	if err != nil {
 		log.Printf("dial mongodb server with connection string %q: %v", connString, err)

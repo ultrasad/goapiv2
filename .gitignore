@@ -17,3 +17,6 @@
 /zaplogs
 
 /.history
+
+/mongodbdata
+/vendor

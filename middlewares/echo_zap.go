@@ -75,9 +75,14 @@ func ZapLogger(log *zap.Logger) echo.MiddlewareFunc {
 				// 	c.Error(err)
 				// }
 
-				reqB := `""`
+				requestBody := `""`
 				if len(reqBody) > 0 {
-					reqB = string(reqBody)
+					requestBody = string(reqBody)
+				}
+
+				responseBody := `""`
+				if len(resBody) > 0 {
+					responseBody = string(resBody)
 				}
 
 				req := c.Request()
@@ -99,12 +104,18 @@ func ZapLogger(log *zap.Logger) echo.MiddlewareFunc {
 
 				//fmt.Println("resBody => ", resBody)
 
-				jsonStr := fmt.Sprintf(`{"id":"%s","req":%s,"res":%s}`, c.Response().Header().Get(echo.HeaderXRequestID), reqB, resBody)
-				//fmt.Println("jsonStr brfore => ", jsonStr)
+				// jsonStr := fmt.Sprintf(`{"id":"%s","req":%s,"res":%s}`, c.Response().Header().Get(echo.HeaderXRequestID), reqB, resBody)
+				jsonStr := fmt.Sprintf(`{"id":"%s","req":%s,"res":%s}`, c.Response().Header().Get(echo.HeaderXRequestID), requestBody, responseBody)
+				// jsonStr := fmt.Sprintf(`{"id":"%s","req":"%s","res":"%s"}`, "XXX", "YYY", "ZZZ")
+				fmt.Println("jsonStr before => ", jsonStr)
 
 				//jsonData := echo.Map{}
 				var jsonData map[string]interface{}
+				// var jsonData Map{}
 				if err := json.Unmarshal([]byte(jsonStr), &jsonData); err != nil {
+					// if e, ok := err.(*json.SyntaxError); ok {
+					// 	fmt.Sprintf("syntax error at byte offset %d", e.Offset)
+					// }
 					panic(err)
 				}
 

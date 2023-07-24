@@ -1,0 +1,39 @@
+version: '3.9'
+
+services:
+  web:
+    container_name: golang_api_web
+    build: .
+    ports:
+      - "8083:8083"
+    depends_on:
+      - db
+
+  # db:
+  #   image: postgres:latest
+  #   environment:
+  #     POSTGRES_USER: your_postgres_user
+  #     POSTGRES_PASSWORD: your_postgres_password
+  #     POSTGRES_DB: your_database_name
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
+
+  db:
+    container_name: golang_api_db
+    image: mongo:4.4
+    command: mongod --auth
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=123456
+      - MONGO_INITDB_DATABASE=document
+      - MONGO_INITDB_USERNAME=hanajung
+      - MONGO_INITDB_PASSWORD=test1234
+    volumes:
+      - ./mongodbdata:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+
+volumes:
+  # db_data:
+  mongodbdata:
